@@ -50,7 +50,6 @@ public class TrainingScreen extends FighterScreen {
     @Override
     public void render (float delta) {
         time += delta;
-        //need to detect when unit is not over a platform
         ScreenUtils.clear(255, 255, 255, 0);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
@@ -66,19 +65,6 @@ public class TrainingScreen extends FighterScreen {
             this.shape.rect(platform.x, platform.y, platform.width, platform.height);
             this.shape.end();
         }
-        //TODO:: move this logic to Player.java
-        if (player.movingDirection == 0 && player.velocityX != 0) {
-            if (player.velocityX > 0) {
-                player.velocityX = Math.max(0, player.velocityX - 1500 * Gdx.graphics.getDeltaTime());
-            } else {
-                player.velocityX = Math.min(0, player.velocityX + 1500 * Gdx.graphics.getDeltaTime());
-            }
-
-        }
-        if (player.platformPass && TimeUtils.millis() - player.keyTime[0] > 200) {
-            player.platformPass = false;
-        }
-
     }
 
     @Override
