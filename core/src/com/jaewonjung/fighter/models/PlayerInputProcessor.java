@@ -29,6 +29,7 @@ public class PlayerInputProcessor implements InputProcessor {
                 }
                 break;
             case Input.Keys.DOWN:
+                p.playerStatus = PlayerStatus.CROUCH;
                 long currentTime = TimeUtils.millis();
                 if (currentTime - p.keyTime[0] < 200) {
                     p.platformPass = true;
@@ -69,7 +70,8 @@ public class PlayerInputProcessor implements InputProcessor {
                 }
                 break;
             case Input.Keys.DOWN:
-
+                if (p.velocityX != 0) p.playerStatus = PlayerStatus.RUNNING;
+                else p.playerStatus = PlayerStatus.STILL;
                 break;
             case Input.Keys.LEFT:
                 float leftDuration = TimeUtils.millis() - p.keyTime[2];
