@@ -90,6 +90,10 @@ public class Player {
             hitbox.y += velocityY * Gdx.graphics.getDeltaTime();
         }
 
+        if ((hitbox.getY() <= 0 || onPlatform) && playerStatus == PlayerStatus.CROUCH) { //decel when landing crouched
+            movingDirection = 0;
+        }
+
         hitbox.x += velocityX * Gdx.graphics.getDeltaTime();
 
         if (hitbox.getY() < 0) {
