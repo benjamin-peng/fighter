@@ -12,18 +12,20 @@ import java.util.*;
 
 public class Player {
     private final Texture stillImage;
-    private Texture runningImage;
+    private final Texture crouchImage;
     private final TextureRegion currentRegion;
+    public final Animation<Texture> runningAnimation;
     private float time;
     public final Rectangle hitbox;
-    public final Animation<Texture> runningAnimation;
     public float velocityX;
     public float velocityY;
+    public float width;
+    public float height;
     public float gravity = (float) - 2000;
     public float jumpVelocity = 800;
     public boolean onPlatform;
     public HashMap<Rectangle, Boolean> canPass;
-    public boolean platformPass;
+    public boolean platformPass; //whether the player has double tapped to trigger
     public int jumpsLeft = 2;
     public int health;
     public int facingDirection;
@@ -35,13 +37,14 @@ public class Player {
     public PlayerStatus playerStatus;
     public Player(Fighter game) {
         this.stillImage = new Texture("stick.png");
-        this.runningImage = new Texture("stick_running.png");
-
+        this.crouchImage = new Texture("crouch.png");
         this.currentRegion = new TextureRegion(stillImage);
         this.playerStatus = PlayerStatus.STILL;
         this.hitbox = new Rectangle(368, 0, 30, 64);
         this.velocityY = 0;
         this.velocityX = 0;
+        this.width = currentRegion.getRegionWidth();
+        this.height = currentRegion.getRegionHeight();
         this.onPlatform = false;
         this.canPass = new HashMap<>();
         this.platformPass = false;
@@ -89,18 +92,18 @@ public class Player {
 
         hitbox.x += velocityX * Gdx.graphics.getDeltaTime();
 
-        if (hitbox.y < 0) {
-            hitbox.y = 0;
+        if (hitbox.getY() < 0) {
+            hitbox.setY(0);
             velocityY = 0;
             jumpsLeft = 2;
         }
 
         //bounds checking
-        if (hitbox.x < 0) {
-            hitbox.x = 0;
+        if (hitbox.getX() < 0) {
+            hitbox.setX(0);
         }
-        if (hitbox.x > game.dimensions[0] - 64) {
-            hitbox.x = game.dimensions[0] - 64;
+        if (hitbox.getX() > game.dimensions[0] - hitbox.getWidth() / 2) {
+            hitbox.setX(game.dimensions[0] - hitbox.getWidth() / 2);
         }
     }
 
@@ -117,28 +120,45 @@ public class Player {
 
     private void updateCurrentRegion() {
         switch (playerStatus) {
+            case CROUCH:
+                //account for discrepancy in image size
+                hitbox.setX((currentRegion.getRegionWidth() - crouchImage.getWidth()) / 2.0f + hitbox.getX());
+                currentRegion.setRegion(crouchImage);
+                break;
             case STILL:
+                hitbox.setX((currentRegion.getRegionWidth() - stillImage.getWidth()) / 2.0f + hitbox.getX());
                 currentRegion.setRegion(stillImage);
                 break;
             case RUNNING:
-                runningImage = runningAnimation.getKeyFrame(time / 2, true);
-                currentRegion.setRegion(runningImage);
-        if ((facingDirection == 1 && currentRegion.isFlipX()) || (facingDirection != 1 && !currentRegion.isFlipX())) {
-            currentRegion.flip(true, false);
+                if (velocityX == 0) {
+                    playerStatus = PlayerStatus.STILL;
+                }
+                else {
+                    Texture currentFrame = runningAnimation.getKeyFrame(time / 2, true);
+                    hitbox.setX((currentRegion.getRegionWidth() - currentFrame.getWidth()) / 2.0f + hitbox.getX());
+                    currentRegion.setRegion(currentFrame);
+                    if ((facingDirection == 1 && currentRegion.isFlipX()) || (facingDirection != 1 && !currentRegion.isFlipX())) {
+                        currentRegion.flip(true, false);
+                    }
+                }
+                break;
         }
+        width = currentRegion.getRegionWidth();
+        height = currentRegion.getRegionHeight();
+        if (width != hitbox.getWidth() || height != hitbox.getHeight()) {
+            hitbox.setWidth(width);
+            hitbox.setHeight(height);
         }
     }
 
 
     public void render(SpriteBatch batch) {
         updateCurrentRegion();
-        int width = currentRegion.getRegionWidth();
-        int height = currentRegion.getRegionHeight();
-        batch.draw(currentRegion, hitbox.x, hitbox.y, 64, 108);//, 100, (int) (height / width) * 100);
+        batch.draw(currentRegion, hitbox.x, hitbox.y, width, height);//, 100, (int) (height / width) * 100);
     }
 
     public void dispose() {
         stillImage.dispose();
-        runningImage.dispose();
+        crouchImage.dispose();
     }
 }
