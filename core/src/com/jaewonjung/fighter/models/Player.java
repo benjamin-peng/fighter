@@ -14,6 +14,7 @@ import java.util.*;
 public class Player {
     private final Texture stillImage;
     private final Texture crouchImage;
+    private final Texture shootImage;
     private final TextureRegion currentRegion;
     public final Animation<Texture> runningAnimation;
     private HealthBar healthBar;
@@ -41,6 +42,7 @@ public class Player {
     public Player(Fighter game) {
         this.stillImage = new Texture("stick.png");
         this.crouchImage = new Texture("crouch.png");
+        this.shootImage = new Texture("shoot.png");
         this.currentRegion = new TextureRegion(stillImage);
         this.health = 100;
         this.name = "Stickman";
@@ -114,7 +116,8 @@ public class Player {
         if (!onPlatform) {
             hitbox.setY(hitbox.getY() + velocityY * Gdx.graphics.getDeltaTime());
         }
-        if ((hitbox.getY() <= 0 || onPlatform) && playerStatus == PlayerStatus.CROUCH) { //decel when landing crouched
+        if ((hitbox.getY() <= 0 || onPlatform) &&
+                (playerStatus == PlayerStatus.CROUCH || playerStatus == PlayerStatus.SHOOT)) { //decel when landing crouched
             movingDirection = 0;
         }
         hitbox.setX(hitbox.getX() + velocityX * Gdx.graphics.getDeltaTime());
@@ -156,12 +159,23 @@ public class Player {
         }
     }
 
+    private void setSpriteDirection() {
+        if ((facingDirection == 1 && currentRegion.isFlipX()) || (facingDirection != 1 && !currentRegion.isFlipX())) {
+            currentRegion.flip(true, false);
+        }
+    }
+
     private void updateCurrentRegion() {
         switch (playerStatus) {
             case CROUCH:
                 //account for discrepancy in image size
                 hitbox.setX((currentRegion.getRegionWidth() - crouchImage.getWidth()) / 2.0f + hitbox.getX());
                 currentRegion.setRegion(crouchImage);
+                break;
+            case SHOOT:
+                hitbox.setX((currentRegion.getRegionWidth() - shootImage.getWidth()) / 2.0f + hitbox.getX());
+                currentRegion.setRegion(shootImage);
+                setSpriteDirection();
                 break;
             case STILL:
                 hitbox.setX((currentRegion.getRegionWidth() - stillImage.getWidth()) / 2.0f + hitbox.getX());
@@ -175,9 +189,7 @@ public class Player {
                     Texture currentFrame = runningAnimation.getKeyFrame(time / 2, true);
                     hitbox.setX((currentRegion.getRegionWidth() - currentFrame.getWidth()) / 2.0f + hitbox.getX());
                     currentRegion.setRegion(currentFrame);
-                    if ((facingDirection == 1 && currentRegion.isFlipX()) || (facingDirection != 1 && !currentRegion.isFlipX())) {
-                        currentRegion.flip(true, false);
-                    }
+                    setSpriteDirection();
                 }
                 break;
         }
