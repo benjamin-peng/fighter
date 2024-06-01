@@ -30,6 +30,7 @@ public class PlayerInputProcessor implements InputProcessor {
                 break;
             case Input.Keys.DOWN:
                 p.playerStatus = PlayerStatus.CROUCH;
+                if (p.onPlatform || p.hitbox.getY() == 0) p.movingDirection = 0; //decel if on ground
                 long currentTime = TimeUtils.millis();
                 if (currentTime - p.keyTime[0] < 200) {
                     p.platformPass = true;
@@ -41,7 +42,6 @@ public class PlayerInputProcessor implements InputProcessor {
 
                 break;
             case Input.Keys.LEFT:
-                //p.velocityX = Math.min(0, p.velocityX - 400);
                 p.velocityX = -400;
                 p.facingDirection = -1;
                 p.playerStatus = PlayerStatus.RUNNING;
@@ -49,12 +49,12 @@ public class PlayerInputProcessor implements InputProcessor {
                 p.keyTime[2] = TimeUtils.millis();
                 break;
             case Input.Keys.RIGHT:
-                //p.velocityX += 400;
                 p.facingDirection = 1;
                 p.velocityX = 400;
                 p.movingDirection = 1;
                 p.playerStatus = PlayerStatus.RUNNING;
                 p.keyTime[3] = TimeUtils.millis();
+                break;
             default:
                 return false;
         }
@@ -70,6 +70,16 @@ public class PlayerInputProcessor implements InputProcessor {
                 }
                 break;
             case Input.Keys.DOWN:
+                if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                    p.velocityX = -400;
+                    p.facingDirection = -1;
+                    p.movingDirection = -1;
+                }
+                else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                    p.velocityX = 400;
+                    p.facingDirection = 1;
+                    p.movingDirection = 1;
+                }
                 if (p.velocityX != 0) p.playerStatus = PlayerStatus.RUNNING;
                 else p.playerStatus = PlayerStatus.STILL;
                 break;
