@@ -16,7 +16,9 @@ public class Player {
     private final Texture crouchImage;
     private final TextureRegion currentRegion;
     public final Animation<Texture> runningAnimation;
+    private HealthBar healthBar;
     private float time;
+    private String name;
     public final Rectangle hitbox;
     public float velocityX;
     public float velocityY;
@@ -28,7 +30,7 @@ public class Player {
     public HashMap<Rectangle, Boolean> canPass;
     public boolean platformPass; //whether the player has double tapped to trigger
     public int jumpsLeft = 2;
-    public int health;
+    public float health;
     public int facingDirection;
     public int movingDirection;
     private boolean inAttack = false;
@@ -40,6 +42,9 @@ public class Player {
         this.stillImage = new Texture("stick.png");
         this.crouchImage = new Texture("crouch.png");
         this.currentRegion = new TextureRegion(stillImage);
+        this.health = 100;
+        this.name = "Stickman";
+        this.healthBar = new HealthBar(game, name, health);
         this.playerStatus = PlayerStatus.STILL;
         this.hitbox = new Rectangle(368, 0, 30, 64);
         this.velocityY = 0;
@@ -49,7 +54,6 @@ public class Player {
         this.onPlatform = false;
         this.canPass = new HashMap<>();
         this.platformPass = false;
-        this.health = 100;
         this.facingDirection = 0;
         this.movingDirection = 0;
         this.keyTime = new long[4];
@@ -63,6 +67,10 @@ public class Player {
         this.runningAnimation = new Animation<Texture>(0.025f, runFrames);
 
         Arrays.fill(this.keyTime, -1);
+    }
+
+    public void takeDamage(float damage) {
+        health = Math.max(0, health - damage);
     }
 
     private void checkOnPlatform(ArrayList<Rectangle> platforms) {
@@ -130,10 +138,11 @@ public class Player {
 
     public void update(ArrayList<Rectangle> platforms) {
         time += Gdx.graphics.getDeltaTime();
-        checkOnPlatform(platforms);
+        healthBar.updateHealth(health);
         updatePosition();
         updateVelocity();
         checkBounds();
+        checkOnPlatform(platforms);
     }
 
     public void attack(Dummy opponent) {
@@ -182,6 +191,7 @@ public class Player {
 
 
     public void render(SpriteBatch batch) {
+        healthBar.render(batch);
         updateCurrentRegion();
         batch.draw(currentRegion, hitbox.x, hitbox.y, width, height);//, 100, (int) (height / width) * 100);
     }

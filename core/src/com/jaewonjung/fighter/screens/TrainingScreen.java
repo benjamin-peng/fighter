@@ -3,6 +3,7 @@ package com.jaewonjung.fighter.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
@@ -64,6 +65,9 @@ public class TrainingScreen extends FighterScreen {
             this.shape.setColor(Color.BLUE);
             this.shape.rect(platform.x, platform.y, platform.width, platform.height);
             this.shape.end();
+        }
+        if (player.hitbox.overlaps(dummy.hitbox)) {
+            player.takeDamage(0.01f);
         }
     }
 
