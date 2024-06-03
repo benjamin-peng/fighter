@@ -1,6 +1,7 @@
 package com.jaewonjung.fighter.models;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -36,6 +37,7 @@ public class Player {
     public int movingDirection;
     private boolean inAttack = false;
     public long[] keyTime;
+    private ArrayList<Laser> lasers;
     private Fighter game;
 
     public PlayerStatus playerStatus;
@@ -56,9 +58,10 @@ public class Player {
         this.onPlatform = false;
         this.canPass = new HashMap<>();
         this.platformPass = false;
-        this.facingDirection = 0;
+        this.facingDirection = 1;
         this.movingDirection = 0;
-        this.keyTime = new long[4];
+        this.keyTime = new long[5];
+        this.lasers = new ArrayList<>();
         this.game = game;
         this.time = 0f;
 
@@ -139,9 +142,27 @@ public class Player {
         }
     }
 
+    public void handleLasers() {
+        Iterator<Laser> it = lasers.iterator();
+        while (it.hasNext()) {
+            Laser l = it.next();
+            l.render(game.batch);
+            l.update();
+            if (l.getX() > game.dimensions[0] || l.getX() < 0) {
+                it.remove();
+            }
+        }
+    }
+
+    public void createLaser() {
+        Laser l = new Laser(hitbox.getX(), hitbox.getY()+48, facingDirection);
+        lasers.add(l);
+    }
+
     public void update(ArrayList<Rectangle> platforms) {
         time += Gdx.graphics.getDeltaTime();
         healthBar.updateHealth(health);
+        handleLasers();
         updatePosition();
         updateVelocity();
         checkBounds();
@@ -205,6 +226,13 @@ public class Player {
     public void render(SpriteBatch batch) {
         healthBar.render(batch);
         updateCurrentRegion();
+        if (playerStatus == PlayerStatus.SHOOT) {
+            long currentTime = TimeUtils.millis();
+            if (currentTime - keyTime[4] > 300) {
+                createLaser();
+                keyTime[4] = currentTime;
+            }
+        }
         batch.draw(currentRegion, hitbox.x, hitbox.y, width, height);//, 100, (int) (height / width) * 100);
     }
 

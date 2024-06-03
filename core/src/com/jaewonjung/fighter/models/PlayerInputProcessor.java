@@ -82,6 +82,7 @@ public class PlayerInputProcessor implements InputProcessor {
     public boolean keyUp (int keycode) {
         switch (keycode) {
             case Input.Keys.Z:
+            case Input.Keys.DOWN:
                 exitNoMotionState();
                 break;
             case Input.Keys.UP:
@@ -89,9 +90,6 @@ public class PlayerInputProcessor implements InputProcessor {
                 if (jumpDuration < 300) {
                     p.velocityY = Math.min(0, p.velocityY - 80);
                 }
-                break;
-            case Input.Keys.DOWN:
-                exitNoMotionState();
                 break;
             case Input.Keys.LEFT:
                 float leftDuration = TimeUtils.millis() - p.keyTime[2];
