@@ -17,15 +17,17 @@ public class HealthBar {
     private float totalHealth;
     private float currentHealth;
     private String name;
+    private int position;
 
-    public HealthBar(Fighter game, String name, float totalHealth) {
-        this.outerBox = new Rectangle(30, game.dimensions[1]-70, 100, 20);
+    public HealthBar(Fighter game, String name, float totalHealth, int position) {
+        this.outerBox = new Rectangle(30, game.dimensions[1]-70-position * 60, 100, 20);
         this.shapeRenderer = new ShapeRenderer();
         this.glyphLayout = new GlyphLayout();
         this.game = game;
         this.totalHealth = totalHealth;
         this.currentHealth = totalHealth;
         this.name = name;
+        this.position = position;
     }
 
     public void updateHealth(float newHealth) {

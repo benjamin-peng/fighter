@@ -37,18 +37,18 @@ public class Player {
     public int movingDirection;
     private boolean inAttack = false;
     public long[] keyTime;
-    private ArrayList<Laser> lasers;
+    private List<Laser> lasers;
     private Fighter game;
 
     public PlayerStatus playerStatus;
-    public Player(Fighter game) {
+    public Player(Fighter game, List<Laser> lasers) {
         this.stillImage = new Texture("stick.png");
         this.crouchImage = new Texture("crouch.png");
         this.shootImage = new Texture("shoot.png");
         this.currentRegion = new TextureRegion(stillImage);
         this.health = 100;
         this.name = "Stickman";
-        this.healthBar = new HealthBar(game, name, health);
+        this.healthBar = new HealthBar(game, name, health, 0);
         this.playerStatus = PlayerStatus.STILL;
         this.hitbox = new Rectangle(368, 0, 30, 64);
         this.velocityY = 0;
@@ -61,7 +61,7 @@ public class Player {
         this.facingDirection = 1;
         this.movingDirection = 0;
         this.keyTime = new long[5];
-        this.lasers = new ArrayList<>();
+        this.lasers = lasers;
         this.game = game;
         this.time = 0f;
 
@@ -142,27 +142,20 @@ public class Player {
         }
     }
 
-    public void handleLasers() {
-        Iterator<Laser> it = lasers.iterator();
-        while (it.hasNext()) {
-            Laser l = it.next();
-            l.render(game.batch);
-            l.update();
-            if (l.getX() > game.dimensions[0] || l.getX() < 0) {
-                it.remove();
-            }
-        }
-    }
 
     public void createLaser() {
-        Laser l = new Laser(hitbox.getX(), hitbox.getY()+48, facingDirection);
+        Laser l = new Laser(hitbox.getX(), hitbox.getY()+48, facingDirection, name);
         lasers.add(l);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void update(ArrayList<Rectangle> platforms) {
         time += Gdx.graphics.getDeltaTime();
         healthBar.updateHealth(health);
-        handleLasers();
+        //handleLasers();
         updatePosition();
         updateVelocity();
         checkBounds();

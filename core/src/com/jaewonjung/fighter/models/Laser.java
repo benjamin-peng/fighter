@@ -8,20 +8,22 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class Laser {
 
+    public static float damage;
     private final Texture laserImage;
     public final Rectangle hitbox;
     private int direction;
+    private String id;
 
-    public Laser (float x, float y, int direction) {
+    public Laser (float x, float y, int direction, String id) {
         this.laserImage = new Texture("laser.png");
         this.hitbox = new Rectangle(x, y, laserImage.getWidth(), laserImage.getHeight());
         this.direction = direction;
+        this.id = id;
+        damage = 50;
     }
 
     public void render(SpriteBatch batch) {
-        batch.begin();
         batch.draw(laserImage, hitbox.getX(), hitbox.getY());
-        batch.end();
     }
 
     public void update() {
@@ -30,5 +32,13 @@ public class Laser {
 
     public float getX() {
         return hitbox.getX();
+    }
+
+    public boolean overlaps(Rectangle r) {
+        return hitbox.overlaps(r);
+    }
+
+    public String getId() {
+        return id;
     }
 }
