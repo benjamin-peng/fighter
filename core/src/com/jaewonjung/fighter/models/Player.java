@@ -1,6 +1,7 @@
 package com.jaewonjung.fighter.models;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -14,6 +15,7 @@ import java.util.*;
 public class Player {
     private final Texture stillImage;
     private final Texture crouchImage;
+    private final Texture shootImage;
     private final TextureRegion currentRegion;
     public final Animation<Texture> runningAnimation;
     private HealthBar healthBar;
@@ -35,16 +37,18 @@ public class Player {
     public int movingDirection;
     private boolean inAttack = false;
     public long[] keyTime;
+    private List<Laser> lasers;
     private Fighter game;
 
     public PlayerStatus playerStatus;
-    public Player(Fighter game) {
+    public Player(Fighter game, List<Laser> lasers) {
         this.stillImage = new Texture("stick.png");
         this.crouchImage = new Texture("crouch.png");
+        this.shootImage = new Texture("shoot.png");
         this.currentRegion = new TextureRegion(stillImage);
         this.health = 100;
         this.name = "Stickman";
-        this.healthBar = new HealthBar(game, name, health);
+        this.healthBar = new HealthBar(game, name, health, 0);
         this.playerStatus = PlayerStatus.STILL;
         this.hitbox = new Rectangle(368, 0, 30, 64);
         this.velocityY = 0;
@@ -54,9 +58,10 @@ public class Player {
         this.onPlatform = false;
         this.canPass = new HashMap<>();
         this.platformPass = false;
-        this.facingDirection = 0;
+        this.facingDirection = 1;
         this.movingDirection = 0;
-        this.keyTime = new long[4];
+        this.keyTime = new long[5];
+        this.lasers = lasers;
         this.game = game;
         this.time = 0f;
 
@@ -114,7 +119,8 @@ public class Player {
         if (!onPlatform) {
             hitbox.setY(hitbox.getY() + velocityY * Gdx.graphics.getDeltaTime());
         }
-        if ((hitbox.getY() <= 0 || onPlatform) && playerStatus == PlayerStatus.CROUCH) { //decel when landing crouched
+        if ((hitbox.getY() <= 0 || onPlatform) &&
+                (playerStatus == PlayerStatus.CROUCH || playerStatus == PlayerStatus.SHOOT)) { //decel when landing crouched
             movingDirection = 0;
         }
         hitbox.setX(hitbox.getX() + velocityX * Gdx.graphics.getDeltaTime());
@@ -136,9 +142,20 @@ public class Player {
         }
     }
 
+
+    public void createLaser() {
+        Laser l = new Laser(hitbox.getX(), hitbox.getY()+48, facingDirection, name);
+        lasers.add(l);
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public void update(ArrayList<Rectangle> platforms) {
         time += Gdx.graphics.getDeltaTime();
         healthBar.updateHealth(health);
+        //handleLasers();
         updatePosition();
         updateVelocity();
         checkBounds();
@@ -156,12 +173,23 @@ public class Player {
         }
     }
 
+    private void setSpriteDirection() {
+        if ((facingDirection == 1 && currentRegion.isFlipX()) || (facingDirection != 1 && !currentRegion.isFlipX())) {
+            currentRegion.flip(true, false);
+        }
+    }
+
     private void updateCurrentRegion() {
         switch (playerStatus) {
             case CROUCH:
                 //account for discrepancy in image size
                 hitbox.setX((currentRegion.getRegionWidth() - crouchImage.getWidth()) / 2.0f + hitbox.getX());
                 currentRegion.setRegion(crouchImage);
+                break;
+            case SHOOT:
+                hitbox.setX((currentRegion.getRegionWidth() - shootImage.getWidth()) / 2.0f + hitbox.getX());
+                currentRegion.setRegion(shootImage);
+                setSpriteDirection();
                 break;
             case STILL:
                 hitbox.setX((currentRegion.getRegionWidth() - stillImage.getWidth()) / 2.0f + hitbox.getX());
@@ -175,9 +203,7 @@ public class Player {
                     Texture currentFrame = runningAnimation.getKeyFrame(time / 2, true);
                     hitbox.setX((currentRegion.getRegionWidth() - currentFrame.getWidth()) / 2.0f + hitbox.getX());
                     currentRegion.setRegion(currentFrame);
-                    if ((facingDirection == 1 && currentRegion.isFlipX()) || (facingDirection != 1 && !currentRegion.isFlipX())) {
-                        currentRegion.flip(true, false);
-                    }
+                    setSpriteDirection();
                 }
                 break;
         }
@@ -193,6 +219,13 @@ public class Player {
     public void render(SpriteBatch batch) {
         healthBar.render(batch);
         updateCurrentRegion();
+        if (playerStatus == PlayerStatus.SHOOT) {
+            long currentTime = TimeUtils.millis();
+            if (currentTime - keyTime[4] > 300) {
+                createLaser();
+                keyTime[4] = currentTime;
+            }
+        }
         batch.draw(currentRegion, hitbox.x, hitbox.y, width, height);//, 100, (int) (height / width) * 100);
     }
 

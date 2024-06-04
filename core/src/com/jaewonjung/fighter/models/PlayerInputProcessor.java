@@ -18,8 +18,26 @@ public class PlayerInputProcessor implements InputProcessor {
         this.p = p;
     }
 
+    private void exitNoMotionState() {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            p.velocityX = -400;
+            p.facingDirection = -1;
+            p.movingDirection = -1;
+        }
+        else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            p.velocityX = 400;
+            p.facingDirection = 1;
+            p.movingDirection = 1;
+        }
+        if (p.velocityX != 0) p.playerStatus = PlayerStatus.RUNNING;
+        else p.playerStatus = PlayerStatus.STILL;
+    }
+
     public boolean keyDown (int keycode) {
         switch (keycode) {
+            case Input.Keys.Z:
+                p.playerStatus = PlayerStatus.SHOOT;
+                break;
             case Input.Keys.UP:
                 if (p.jumpsLeft > 0) {
                     p.onPlatform = false;
@@ -63,25 +81,15 @@ public class PlayerInputProcessor implements InputProcessor {
 
     public boolean keyUp (int keycode) {
         switch (keycode) {
+            case Input.Keys.Z:
+            case Input.Keys.DOWN:
+                exitNoMotionState();
+                break;
             case Input.Keys.UP:
                 float jumpDuration = TimeUtils.millis() - p.keyTime[0];
                 if (jumpDuration < 300) {
                     p.velocityY = Math.min(0, p.velocityY - 80);
                 }
-                break;
-            case Input.Keys.DOWN:
-                if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                    p.velocityX = -400;
-                    p.facingDirection = -1;
-                    p.movingDirection = -1;
-                }
-                else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                    p.velocityX = 400;
-                    p.facingDirection = 1;
-                    p.movingDirection = 1;
-                }
-                if (p.velocityX != 0) p.playerStatus = PlayerStatus.RUNNING;
-                else p.playerStatus = PlayerStatus.STILL;
                 break;
             case Input.Keys.LEFT:
                 float leftDuration = TimeUtils.millis() - p.keyTime[2];
