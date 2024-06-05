@@ -6,26 +6,20 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.jaewonjung.fighter.Fighter;
+import com.jaewonjung.fighter.screens.CombatScreen;
 
 import java.util.ArrayList;
 
-public class Dummy {
-    private final Sprite dummySprite;
-    public Rectangle hitbox;
-    public float health;
-    public float velocityY;
-    public float gravity = (float) - 2000;
-    public boolean onPlatform;
-    private HealthBar healthBar;
-    private Fighter game;
+public class Dummy extends Combatant {
 
     public Dummy(Fighter game) {
-        this.dummySprite = new Sprite(new Texture("dummy.png"));
-        this.hitbox = new Rectangle((float) Math.random() * (game.dimensions[0] - dummySprite.getWidth()), (float) Math.random() * game.dimensions[1], dummySprite.getWidth(), dummySprite.getHeight());
-        this.health = 100f;
-        this.velocityY = 0;
+        this.sprite = new Sprite(new Texture("dummy.png"));
+        this.hitbox = new Rectangle((float) Math.random() * (game.dimensions[0] - sprite.getWidth()), (float) Math.random() * game.dimensions[1], sprite.getWidth(), sprite.getHeight());
+        this.velocity = new float[] {0,0};
         this.onPlatform = false;
-        this.healthBar = new HealthBar(game, "Dummy", health, 1);
+        this.name = "Dummy";
+        this.health = 100;
+        this.healthBar = new HealthBar(game, name, health, 1);
         this.game = game;
     }
 
@@ -33,16 +27,16 @@ public class Dummy {
         health = 100;
         hitbox.setX((float) Math.random() * game.dimensions[0]);
         hitbox.setY((float) Math.random() * game.dimensions[1]);
-        dummySprite.setX(hitbox.getX());
-        dummySprite.setY(hitbox.getY());
-        dummySprite.setAlpha(1.0f);
+        sprite.setX(hitbox.getX());
+        sprite.setY(hitbox.getY());
+        sprite.setAlpha(1.0f);
     }
 
     public void update(ArrayList<Rectangle> platforms) {
         for (Rectangle platform: platforms) {
             if (hitbox.overlaps(platform)) {
-                if (!onPlatform && velocityY < 0 && hitbox.y > platform.y) {
-                    velocityY = 0;
+                if (!onPlatform && velocity[1] < 0 && hitbox.y > platform.y) {
+                    velocity[1] = 0;
                     hitbox.y = platform.y + platform.height - 1;
                     onPlatform = true;
                 }
@@ -51,13 +45,13 @@ public class Dummy {
             }
         }
         if (!onPlatform) {
-            velocityY += gravity * Gdx.graphics.getDeltaTime();
-            hitbox.y += velocityY * Gdx.graphics.getDeltaTime();
+            velocity[1] += CombatScreen.gravity * Gdx.graphics.getDeltaTime();
+            hitbox.y += velocity[1] * Gdx.graphics.getDeltaTime();
         }
 
         if (hitbox.y < 0) {
             hitbox.y = 0;
-            velocityY = 0;
+            velocity[1] = 0;
         }
 
         if (hitbox.x < 0) {
@@ -66,24 +60,20 @@ public class Dummy {
         if (hitbox.x > game.dimensions[0]) {
             hitbox.x = game.dimensions[0];
         }
-        dummySprite.setX(hitbox.getX());
-        dummySprite.setY(hitbox.getY());
+        sprite.setX(hitbox.getX());
+        sprite.setY(hitbox.getY());
         healthBar.updateHealth(health);
         if (health <= 0) {
-            dummySprite.setAlpha(Math.max(0, dummySprite.getColor().a - 0.05f));
-            if (dummySprite.getColor().a == 0) {
+            sprite.setAlpha(Math.max(0, sprite.getColor().a - 0.05f));
+            if (sprite.getColor().a == 0) {
                 respawn();
             }
         }
     }
 
-    public void takeDamage(float damage) {
-        health = Math.max(0, health - damage);
-    }
-
     public void render(SpriteBatch batch) {
         healthBar.render(batch);
-        dummySprite.draw(batch);
+        sprite.draw(batch);
     }
 
 

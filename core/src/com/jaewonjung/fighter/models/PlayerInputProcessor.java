@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class PlayerInputProcessor implements InputProcessor {
 
-    private Player p;
+    private final Player p;
     private long jumpTime;
     private long leftTime;
     private long rightTime;
@@ -20,16 +20,16 @@ public class PlayerInputProcessor implements InputProcessor {
 
     private void exitNoMotionState() {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            p.velocityX = -400;
+            p.velocity[0] = -400;
             p.facingDirection = -1;
             p.movingDirection = -1;
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            p.velocityX = 400;
+            p.velocity[0] = 400;
             p.facingDirection = 1;
             p.movingDirection = 1;
         }
-        if (p.velocityX != 0) p.playerStatus = PlayerStatus.RUNNING;
+        if (p.velocity[0] != 0) p.playerStatus = PlayerStatus.RUNNING;
         else p.playerStatus = PlayerStatus.STILL;
     }
 
@@ -41,7 +41,7 @@ public class PlayerInputProcessor implements InputProcessor {
             case Input.Keys.UP:
                 if (p.jumpsLeft > 0) {
                     p.onPlatform = false;
-                    p.velocityY = p.jumpVelocity;
+                    p.velocity[1] = p.jumpVelocity;
                     p.jumpsLeft -= 1;
                     p.keyTime[0] = TimeUtils.millis();
                 }
@@ -54,13 +54,13 @@ public class PlayerInputProcessor implements InputProcessor {
                     p.platformPass = true;
                 }
                 else {
-                    p.velocityY -= 400;
+                    p.velocity[1] -= 400;
                 }
                 p.keyTime[0] = currentTime;
 
                 break;
             case Input.Keys.LEFT:
-                p.velocityX = -400;
+                p.velocity[0] = -400;
                 p.facingDirection = -1;
                 p.playerStatus = PlayerStatus.RUNNING;
                 p.movingDirection = -1;
@@ -68,7 +68,7 @@ public class PlayerInputProcessor implements InputProcessor {
                 break;
             case Input.Keys.RIGHT:
                 p.facingDirection = 1;
-                p.velocityX = 400;
+                p.velocity[0] = 400;
                 p.movingDirection = 1;
                 p.playerStatus = PlayerStatus.RUNNING;
                 p.keyTime[3] = TimeUtils.millis();
@@ -88,13 +88,13 @@ public class PlayerInputProcessor implements InputProcessor {
             case Input.Keys.UP:
                 float jumpDuration = TimeUtils.millis() - p.keyTime[0];
                 if (jumpDuration < 300) {
-                    p.velocityY = Math.min(0, p.velocityY - 80);
+                    p.velocity[1] = Math.min(0, p.velocity[1] - 80);
                 }
                 break;
             case Input.Keys.LEFT:
                 float leftDuration = TimeUtils.millis() - p.keyTime[2];
                 if (leftDuration < 300) {
-                    p.velocityX = Math.min(0, p.velocityX + 200);
+                    p.velocity[0] = Math.min(0, p.velocity[0] + 200);
                 }
                 if (p.movingDirection == -1) {
                     p.movingDirection = 0;
@@ -103,7 +103,7 @@ public class PlayerInputProcessor implements InputProcessor {
             case Input.Keys.RIGHT:
                 float rightDuration = TimeUtils.millis() - p.keyTime[3];
                 if (rightDuration < 300) {
-                    p.velocityX = Math.max(0, p.velocityX - 200);
+                    p.velocity[0] = Math.max(0, p.velocity[0] - 200);
                 }
                 if (p.movingDirection == 1) {
                     p.movingDirection = 0;

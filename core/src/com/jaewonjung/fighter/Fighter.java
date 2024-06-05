@@ -17,6 +17,7 @@ import com.jaewonjung.fighter.models.PlayerStatus;
 import com.jaewonjung.fighter.models.PlayerInputProcessor;
 import com.jaewonjung.fighter.screens.IntroScreen;
 import com.jaewonjung.fighter.screens.TrainingScreen;
+import com.jaewonjung.fighter.screens.TwoPlayerScreen;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,7 @@ public class Fighter extends Game {
 	public BitmapFont font;
 	public int[] dimensions;
 	public TrainingScreen trainingScreen;
+	public TwoPlayerScreen twoPlayerScreen;
 	public IntroScreen introScreen;
 
 	@Override
@@ -34,6 +36,7 @@ public class Fighter extends Game {
 		batch = new SpriteBatch();
 		font = new BitmapFont();
 		trainingScreen = new TrainingScreen(this);
+		twoPlayerScreen = new TwoPlayerScreen(this);
 		introScreen = new IntroScreen(this);
 		setScreen(introScreen);
 	}

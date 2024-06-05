@@ -20,7 +20,8 @@ public class IntroScreen extends FighterScreen {
 
     private static GlyphLayout glyphLayout;
     private Stage stage;
-    private TextButton button;
+    private TextButton trainingButton;
+    private TextButton twoPlayerButton;
     private TextButton.TextButtonStyle textButtonStyle;
 
     public IntroScreen (Fighter game) {
@@ -32,18 +33,32 @@ public class IntroScreen extends FighterScreen {
         textButtonStyle.font = game.font;
         textButtonStyle.fontColor = Color.BLACK;
 
-        button = new TextButton("Training Mode", textButtonStyle);
-        button.getLabel().setFontScale(2, 2);
-        button.setPosition((game.dimensions[0] - button.getWidth()) /2,game.dimensions[1] / 5);
-        button.setVisible(false);
+        twoPlayerButton = new TextButton("1v1 Mode", textButtonStyle);
+        twoPlayerButton.getLabel().setFontScale(2, 2);
+        twoPlayerButton.setPosition((game.dimensions[0] - twoPlayerButton.getWidth()) / 3,game.dimensions[1] / 5);
+        twoPlayerButton.setVisible(false);
 
-        button.addListener(new ClickListener() {
+        trainingButton = new TextButton("Training Mode", textButtonStyle);
+        trainingButton.getLabel().setFontScale(2, 2);
+        trainingButton.setPosition((game.dimensions[0] - trainingButton.getWidth()) * 2/3,game.dimensions[1] / 5);
+        trainingButton.setVisible(false);
+
+        twoPlayerButton.setWidth(trainingButton.getWidth());
+
+        trainingButton.addListener(new ClickListener() {
             public void clicked(InputEvent e, float x, float y) {
                 game.setScreen(game.trainingScreen);
             }
         });
 
-        stage.addActor(button);
+        twoPlayerButton.addListener(new ClickListener() {
+            public void clicked(InputEvent e, float x, float y) {
+                game.setScreen(game.twoPlayerScreen);
+            }
+        });
+
+        stage.addActor(trainingButton);
+        stage.addActor(twoPlayerButton);
 
         Gdx.input.setInputProcessor(stage);
     }
@@ -57,7 +72,8 @@ public class IntroScreen extends FighterScreen {
         game.batch.begin();
 
         if (time > 1) {
-            button.setVisible(true);
+            trainingButton.setVisible(true);
+            twoPlayerButton.setVisible(true);
         }
 
         float fontY = Math.min(game.dimensions[1] * 2 / 3, time * 500);
